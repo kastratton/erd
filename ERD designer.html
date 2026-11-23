@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ERD designer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{--bg:#F3F5F9;--panel:#fff;--line:#E1E6ED;--ink:#172033;--muted:#64708A;--accent:#2F5BEA;--card:#fff;--cardline:#D7DDE7;--rowline:#EDF0F5;--rel:#5B6780;--dot:#CBD3DF;--danger:#C23B3B;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F141C;--panel:#161C27;--line:#263041;--ink:#E6EBF3;--muted:#8D99AF;--accent:#7C9AFF;--card:#1A2230;--cardline:#2D3850;--rowline:#242E40;--rel:#9AA7C0;--dot:#263041;--danger:#F07878;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0F141C;--panel:#161C27;--line:#263041;--ink:#E6EBF3;--muted:#8D99AF;--accent:#7C9AFF;--card:#1A2230;--cardline:#2D3850;--rowline:#242E40;--rel:#9AA7C0;--dot:#263041;--danger:#F07878;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+html,body{height:100%}
+body{margin:0;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font:500 14px/1.4 Manrope,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}
+header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+h1{font-size:16px;font-weight:800;margin:0 8px 0 0;display:flex;align-items:center;gap:10px;letter-spacing:-.01em}
+h1 svg{color:var(--accent)}
+.sp{flex:1}
+.btn{height:34px;padding:0 13px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:600 13px Manrope,system-ui,sans-serif;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+:root:not([data-theme="dark"]) .btn.primary{color:#fff}
+.btn.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent)}
+.btn.danger{color:var(--danger)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{flex:1;display:flex;min-height:0}
+#wrap{position:relative;flex:1;min-width:0;display:flex}
+#stage{flex:1;overflow:auto;background-image:radial-gradient(var(--dot) 1px,transparent 1px);background-size:20px 20px;background-attachment:local}
+#cv{display:block;min-width:100%;min-height:100%}
+#cv text{pointer-events:none}
+#cv [data-t]{touch-action:none}
+#cv.linking .row{cursor:crosshair}
+#cv.linking .row:hover{fill:rgba(47,91,234,.14)}
+#toast{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:999px;font-weight:600;font-size:13px;max-width:90%;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.show{opacity:1}
+#empty{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;pointer-events:none}
+#empty.show{display:flex}
+#empty p{margin:0;color:var(--muted);font-size:15px}
+#empty .row2{display:flex;gap:8px;pointer-events:auto}
+aside{width:310px;flex:none;background:var(--panel);border-left:1px solid var(--line);overflow:auto;padding:16px}
+h2{font-size:13px;font-weight:700;color:var(--muted);margin:18px 0 8px}
+#editor>h2:first-child{margin-top:0}
+.hint{color:var(--muted);margin:0 0 4px;font-size:13px}
+.in{width:100%;box-sizing:border-box;height:32px;padding:0 9px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);font:500 13px Manrope,system-ui,sans-serif;min-width:0}
+.sw{display:flex;gap:8px;margin-top:10px}
+.sw button{width:24px;height:24px;border-radius:50%;border:2px solid var(--panel);cursor:pointer;padding:0}
+.sw button.on{box-shadow:0 0 0 2px var(--ink)}
+.col{display:grid;grid-template-columns:1fr 86px 32px 32px 24px;gap:5px;margin-bottom:6px;align-items:center}
+.col .in:nth-child(2){font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px}
+.k{height:32px;border-radius:7px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font:700 11px Manrope,system-ui,sans-serif;cursor:pointer;padding:0}
+.k.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.x{border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0;height:32px}
+.x:hover{color:var(--danger)}
+#editor .btn{margin:6px 6px 0 0}
+.rel{display:flex;align-items:center;gap:6px;padding:7px 0;border-top:1px solid var(--line);font-size:13px}
+.rel span{flex:1;min-width:0;overflow-wrap:anywhere}
+.rel b{color:var(--muted)}
+.rel select{height:28px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:600 12px Manrope,system-ui,sans-serif}
+@media(max-width:760px){main{flex-direction:column}#wrap{flex:1 1 55%;min-height:0}aside{width:auto;border-left:0;border-top:1px solid var(--line);max-height:42%}h1{width:100%}}
+</style>
+</head>
+<body>
+<header>
+  <h1><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="9" height="8" rx="2"/><rect x="15" y="15" width="9" height="8" rx="2"/><path d="M11 7h4a3 3 0 0 1 3 3v5"/></svg>ERD designer</h1>
+  <button class="btn primary" id="add">Add table</button>
+  <button class="btn" id="conn">Connect columns</button>
+  <span class="sp"></span>
+  <button class="btn" id="clear">Clear</button>
+  <button class="btn primary" id="export">Export PNG</button>
+</header>
+<main>
+  <div id="wrap">
+    <div id="stage"><svg id="cv" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <div id="empty"><p>Your diagram is empty.</p><div class="row2"><button class="btn primary" id="add2">Add a table</button><button class="btn" id="ex">Load example</button></div></div>
+    <div id="toast" role="status"></div>
+  </div>
+  <aside><div id="editor"></div><div id="rels"></div></aside>
+</main>
+<datalist id="types"><option>uuid</option><option>int</option><option>bigint</option><option>varchar</option><option>text</option><option>boolean</option><option>decimal</option><option>date</option><option>timestamp</option><option>json</option></datalist>
+<script>
+const W=232,HH=38,RH=28,COLORS=['#3B6FE0','#0E9F8E','#D9822B','#C2467A','#7A5AF8','#4C8B2B'];
+const FONT="Manrope,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif",MONO="'JetBrains Mono',ui-monospace,Menlo,monospace";
+const LIVE={card:'var(--card)',cl:'var(--cardline)',ink:'var(--ink)',mut:'var(--muted)',ln:'var(--rowline)',acc:'var(--accent)',rel:'var(--rel)'};
+const EXP={card:'#ffffff',cl:'#D7DDE7',ink:'#172033',mut:'#64708A',ln:'#EDF0F5',acc:'#2F5BEA',rel:'#5B6780'};
+const $=s=>document.querySelector(s),svg=$('#cv');
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const ell=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s;
+let uid=Date.now(),S,sel=null,connect=null,drag=null,tt;
+const nid=()=>'i'+(uid++);
+const tblH=t=>HH+t.cols.length*RH+6;
+const colY=(t,id)=>t.y+HH+Math.max(t.cols.findIndex(c=>c.id===id),0)*RH+RH/2;
+
+function sample(){
+  const mk=(name,x,y,color,cols)=>({id:nid(),name,x,y,color,cols:cols.map(([n,t,pk,fk])=>({id:nid(),n,t,pk:!!pk,fk:!!fk}))});
+  const u=mk('users',64,56,0,[['id','uuid',1],['email','varchar'],['name','varchar'],['created_at','timestamp']]);
+  const o=mk('orders',424,56,1,[['id','uuid',1],['user_id','uuid',0,1],['status','varchar'],['placed_at','timestamp']]);
+  const p=mk('products',64,288,3,[['id','uuid',1],['title','varchar'],['price','decimal']]);
+  const i=mk('order_items',424,288,2,[['order_id','uuid',1,1],['product_id','uuid',1,1],['quantity','int']]);
+  const r=(a,x,b,y,type)=>({id:nid(),a:a.id,ac:a.cols[x].id,b:b.id,bc:b.cols[y].id,type});
+  return{tables:[u,o,p,i],rels:[r(u,0,o,1,'1:N'),r(o,0,i,0,'1:N'),r(p,0,i,1,'1:N')]};
+}
+try{S=JSON.parse(localStorage.getItem('erd-v1'))}catch(e){}
+if(!S||!Array.isArray(S.tables)||!Array.isArray(S.rels))S=sample();
+const save=()=>{try{localStorage.setItem('erd-v1',JSON.stringify(S))}catch(e){}};
+
+function gen(P){
+  const T=id=>S.tables.find(t=>t.id===id);
+  const mark=(x,y,d,many)=>many?`M${x},${y-7}L${x+d*12},${y}L${x},${y+7}M${x},${y}L${x+d*12},${y}`:`M${x+d*11},${y-7}L${x+d*11},${y+7}`;
+  let rels='',tabs='';
+  for(const r of S.rels){
+    const a=T(r.a),b=T(r.b);if(!a||!b)continue;
+    const ya=colY(a,r.ac),yb=colY(b,r.bc);let xa,xb,da,db;
+    if(a.x+W+30<=b.x){xa=a.x+W;xb=b.x;da=1;db=-1}
+    else if(b.x+W+30<=a.x){xa=a.x;xb=b.x+W;da=-1;db=1}
+    else{xa=a.x+W;xb=b.x+W;da=db=1}
+    const k=da===-db?Math.max(50,Math.abs(xb-xa)/2):70;
+    rels+=`<path d="M${xa},${ya}C${xa+da*k},${ya} ${xb+db*k},${yb} ${xb},${yb}" style="fill:none;stroke:${P.rel};stroke-width:1.6"/>`+
+      `<path d="${mark(xa,ya,da,r.type[0]==='N')}${mark(xb,yb,db,r.type[2]==='N')}" style="fill:none;stroke:${P.rel};stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round"/>`;
+  }
+  for(const t of S.tables){
+    const h=tblH(t),on=t.id===sel,col=COLORS[t.color%COLORS.length];
+    tabs+=`<g data-t="${t.id}" transform="translate(${t.x},${t.y})" style="cursor:grab">`+
+      `<rect width="${W}" height="${h}" rx="10" style="fill:${P.card};stroke:${on?P.acc:P.cl};stroke-width:${on?2:1}"/>`+
+      `<path d="M0,${HH}V10a10,10 0 0 1 10,-10H${W-10}a10,10 0 0 1 10,10V${HH}Z" style="fill:${col}"/>`+
+      `<text x="14" y="${HH/2+5}" style="fill:#fff;font:700 14px ${FONT}">${esc(ell(t.name,24))}</text>`;
+    t.cols.forEach((c,i)=>{
+      const y=HH+i*RH,pend=connect&&connect.from&&connect.from.c===c.id;
+      tabs+=(i?`<line x1="0" x2="${W}" y1="${y}" y2="${y}" style="stroke:${P.ln}"/>`:'')+
+        `<rect class="row" data-c="${c.id}" x="1" y="${y}" width="${W-2}" height="${RH}" style="fill:${pend?'rgba(47,91,234,.2)':'transparent'}"/>`;
+      if(c.pk||c.fk){
+        const bc=c.pk?'#D9822B':'#3B6FE0';
+        tabs+=`<rect x="10" y="${y+7}" width="28" height="14" rx="4" style="fill:${bc};fill-opacity:.18"/>`+
+          `<text x="24" y="${y+17.5}" text-anchor="middle" style="fill:${bc};font:700 8.5px ${FONT}">${c.pk&&c.fk?'PFK':c.pk?'PK':'FK'}</text>`;
+      }
+      tabs+=`<text x="46" y="${y+RH/2+4.5}" style="fill:${P.ink};font:${c.pk?700:500} 13px ${FONT}">${esc(ell(c.n,15))}</text>`+
+        `<text x="${W-12}" y="${y+RH/2+4}" text-anchor="end" style="fill:${P.mut};font:500 11px ${MONO}">${esc(ell(c.t,11))}</text>`;
+    });
+    tabs+='</g>';
+  }
+  return`<g style="font-family:${FONT}">${rels}${tabs}</g>`;
+}
+function draw(){
+  svg.innerHTML=gen(LIVE);
+  let mx=0,my=0;for(const t of S.tables){mx=Math.max(mx,t.x+W);my=Math.max(my,t.y+tblH(t))}
+  svg.setAttribute('width',mx+320);svg.setAttribute('height',my+280);
+}
+function renderEditor(){
+  const t=sel&&S.tables.find(x=>x.id===sel),el=$('#editor');
+  if(!t){el.innerHTML='<p class="hint">Select a table to rename it and edit its columns, or add a new table.</p>';return}
+  el.innerHTML=`<h2>Table</h2><input class="in" data-f="tn" value="${esc(t.name)}" aria-label="Table name">`+
+    `<div class="sw">${COLORS.map((c,i)=>`<button data-a="color" data-i="${i}" aria-label="Header color ${i+1}" style="background:${c}" class="${i===t.color?'on':''}"></button>`).join('')}</div>`+
+    `<h2>Columns</h2>`+t.cols.map(c=>`<div class="col" data-c="${c.id}"><input class="in" data-f="cn" value="${esc(c.n)}" aria-label="Column name"><input class="in" data-f="ct" list="types" value="${esc(c.t)}" aria-label="Data type"><button class="k ${c.pk?'on':''}" data-a="pk" title="Primary key">PK</button><button class="k ${c.fk?'on':''}" data-a="fk" title="Foreign key">FK</button><button class="x" data-a="delc" aria-label="Remove column">×</button></div>`).join('')+
+    `<button class="btn" data-a="addc">Add column</button><button class="btn danger" data-a="delt">Delete table</button>`;
+}
+function renderRels(){
+  const T=id=>S.tables.find(t=>t.id===id),cn=(t,id)=>{const c=t.cols.find(c=>c.id===id);return c?c.n:'?'};
+  const items=S.rels.map(r=>{const a=T(r.a),b=T(r.b);if(!a||!b)return'';
+    return`<div class="rel" data-r="${r.id}"><span>${esc(a.name)}.${esc(cn(a,r.ac))} <b>→</b> ${esc(b.name)}.${esc(cn(b,r.bc))}</span><select data-f="rt" aria-label="Cardinality">${['1:1','1:N','N:N'].map(v=>`<option${v===r.type?' selected':''}>${v}</option>`).join('')}</select><button class="x" data-a="delr" aria-label="Remove relationship">×</button></div>`}).join('');
+  $('#rels').innerHTML=`<h2>Relationships</h2>${items||'<p class="hint">None yet. Choose Connect columns, then click a column in each table.</p>'}`;
+}
+function refresh(){
+  draw();renderEditor();renderRels();save();
+  $('#empty').classList.toggle('show',!S.tables.length);
+}
+function hint(msg,sticky){
+  const t=$('#toast');clearTimeout(tt);t.textContent=msg;t.classList.toggle('show',!!msg);
+  if(msg&&!sticky)tt=setTimeout(()=>t.classList.remove('show'),2800);
+}
+function setConnect(on){
+  connect=on?{from:null}:null;
+  $('#conn').classList.toggle('on',on);svg.classList.toggle('linking',on);
+  hint(on?'Click the column you’re linking from.':'',on);
+}
+function pick(t,cid){
+  if(!connect.from){connect.from={t:t.id,c:cid};hint('Now click the column it points to.',1);draw();return}
+  const f=connect.from;
+  if(f.c===cid){connect.from=null;hint('Click the column you’re linking from.',1);draw();return}
+  S.rels.push({id:nid(),a:f.t,ac:f.c,b:t.id,bc:cid,type:'1:N'});
+  setConnect(false);hint('Relationship added. Change its type in the sidebar.');refresh();
+}
+function addTable(){
+  const n=S.tables.length,t={id:nid(),name:'table_'+(n+1),x:64+(n%3)*296,y:56+Math.floor(n/3)*232,color:n%COLORS.length,cols:[{id:nid(),n:'id',t:'uuid',pk:true,fk:false}]};
+  S.tables.push(t);sel=t.id;refresh();
+}
+const pt=e=>{const r=svg.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
+svg.addEventListener('pointerdown',e=>{
+  const g=e.target.closest('[data-t]');
+  if(!g){if(!connect&&sel){sel=null;draw();renderEditor()}return}
+  const t=S.tables.find(x=>x.id===g.dataset.t);
+  if(connect){const row=e.target.closest('.row');if(row)pick(t,row.dataset.c);return}
+  const p=pt(e);drag={t,dx:p.x-t.x,dy:p.y-t.y};
+  if(sel!==t.id){sel=t.id;draw();renderEditor()}
+  e.preventDefault();
+});
+addEventListener('pointermove',e=>{
+  if(!drag)return;const p=pt(e);
+  drag.t.x=Math.max(8,Math.round((p.x-drag.dx)/8)*8);drag.t.y=Math.max(8,Math.round((p.y-drag.dy)/8)*8);draw();
+});
+const endDrag=()=>{if(drag){drag=null;save()}};
+addEventListener('pointerup',endDrag);addEventListener('pointercancel',endDrag);
+
+$('aside').addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;
+  const a=b.dataset.a,t=S.tables.find(x=>x.id===sel),cid=b.closest('.col')?.dataset.c;
+  if(a==='color')t.color=+b.dataset.i;
+  else if(a==='pk'||a==='fk'){const c=t.cols.find(c=>c.id===cid);c[a]=!c[a]}
+  else if(a==='delc'){t.cols=t.cols.filter(c=>c.id!==cid);S.rels=S.rels.filter(r=>r.ac!==cid&&r.bc!==cid)}
+  else if(a==='addc')t.cols.push({id:nid(),n:'column',t:'varchar',pk:false,fk:false});
+  else if(a==='delt'){S.rels=S.rels.filter(r=>r.a!==t.id&&r.b!==t.id);S.tables=S.tables.filter(x=>x!==t);sel=null}
+  else if(a==='delr')S.rels=S.rels.filter(r=>r.id!==b.closest('.rel').dataset.r);
+  refresh();
+});
+$('aside').addEventListener('input',e=>{
+  const f=e.target.dataset.f;if(!f)return;
+  const t=S.tables.find(x=>x.id===sel);
+  if(f==='tn')t.name=e.target.value;
+  else if(f==='cn'||f==='ct'){const c=t.cols.find(c=>c.id===e.target.closest('.col').dataset.c);c[f==='cn'?'n':'t']=e.target.value}
+  else if(f==='rt')S.rels.find(r=>r.id===e.target.closest('.rel').dataset.r).type=e.target.value;
+  draw();if(f!=='rt')renderRels();save();
+});
+
+$('#add').onclick=$('#add2').onclick=addTable;
+$('#conn').onclick=()=>{
+  if(S.tables.length<2&&!connect)return hint('Add at least two tables to connect.');
+  setConnect(!connect);
+};
+$('#ex').onclick=()=>{S=sample();sel=null;refresh()};
+$('#clear').onclick=function(){
+  if(!this.dataset.arm){
+    this.dataset.arm=1;this.textContent='Click again to clear';
+    setTimeout(()=>{delete this.dataset.arm;this.textContent='Clear'},3000);return;
+  }
+  delete this.dataset.arm;this.textContent='Clear';S={tables:[],rels:[]};sel=null;setConnect(false);refresh();
+};
+$('#export').onclick=async()=>{
+  if(!S.tables.length)return hint('Add a table before exporting.');
+  const pad=48,minx=Math.min(...S.tables.map(t=>t.x))-pad,miny=Math.min(...S.tables.map(t=>t.y))-pad;
+  const maxx=Math.max(...S.tables.map(t=>t.x+W))+pad+20,maxy=Math.max(...S.tables.map(t=>t.y+tblH(t)))+pad;
+  const w=maxx-minx,h=maxy-miny;
+  const src=`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="${minx} ${miny} ${w} ${h}"><rect x="${minx}" y="${miny}" width="${w}" height="${h}" fill="#ffffff"/>${gen(EXP)}</svg>`;
+  try{
+    const img=new Image();
+    await new Promise((ok,no)=>{img.onload=ok;img.onerror=no;img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(src)});
+    const sc=Math.min(2,8000/Math.max(w,h)),cv=document.createElement('canvas');
+    cv.width=Math.round(w*sc);cv.height=Math.round(h*sc);
+    const ctx=cv.getContext('2d');ctx.scale(sc,sc);ctx.drawImage(img,0,0,w,h);
+    const blob=await new Promise(r=>cv.toBlob(r,'image/png'));
+    const d=window.claude&&await claude.use('downloads');
+    if(!d)return hint('Saving files isn’t available in this view.');
+    await d.save({filename:'erd-diagram.png',data:blob});
+    hint('PNG exported.');
+  }catch(err){if(!err||err.code!=='declined')hint('Couldn’t export the PNG. Try again.')}
+};
+refresh();
+</script>
+</body>
+</html>
